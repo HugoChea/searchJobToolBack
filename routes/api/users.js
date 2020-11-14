@@ -20,9 +20,11 @@ router.post("/register", (req, res) => {
         return res.status(400).json(errors);
     }
     User.findOne({ email: req.body.email }).then((user) => {
+        //  Check if email already used
         if (user) {
             return res.status(400).json({ email: "Email already exists" });
         } else {
+            //  Create new User Object
             const newUser = new User({
                 name: req.body.name,
                 email: req.body.email,
@@ -33,6 +35,7 @@ router.post("/register", (req, res) => {
                 bcrypt.hash(newUser.password, salt, (err, hash) => {
                     if (err) throw err;
                     newUser.password = hash;
+                    //  Save User using mongoose method
                     newUser
                         .save()
                         .then((user) => res.json(user))

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
+const secret = keys.secretOrKey;
 // Load input validation
 const validateJobInput = require("../../controllers/job");
 // Load User model
@@ -11,19 +12,33 @@ const Job = require("../../models/Job");
 // @desc get all job
 // @access Public
 router.get("/", (req, res) => {
-    Job.find({ author: req.body.author }).then((jobs) => {
-        res.json(jobs);
-    });
-});
+    Job.find({ author: req.query.author }).then((jobs) => {
+        res.json(jobs)
+    })
+})
 
 // @route POST api/jobs/add
 // @desc New job
-// @access Public
+// @access Token Bearer
 router.post("/add", (req, res) => {
     const { errors, isValid } = validateJobInput(req.body);
+
+    //  Get jwt token from header
+    //  Remove Bearer from token and verify if token is valid
+    //  If not valid, return 403 reponse = Forbidden 
+    bearer = req.headers.authorization.replace(/^Bearer\s/, '')
+    jwt.verify(bearer, secret, function(err, decoded) {
+        if(err){
+            return res.status(403).json(err)
+        }
+    })
+
+    //  Check if data is valid
     if (!isValid) {
-        return res.status(400).json(errors);
+        return res.status(400).json(errors)
     }
+
+    //  Create Job Object
     const newJob = new Job({
         author: req.body.author,
         name: req.body.name,
@@ -33,12 +48,14 @@ router.post("/add", (req, res) => {
         link: req.body.link,
         contact: req.body.contact,
         comment: req.body.comment,
+        status : req.body.status,
     });
 
+    //  Save the new Job Object using mongoose method
     newJob
         .save()
         .then((job) => res.json(job))
-        .catch((err) => console.log(err));
+        .catch((err) => console.log(err))
 });
 
 // @route POST api/jobs/add
