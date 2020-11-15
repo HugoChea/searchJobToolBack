@@ -40,6 +40,7 @@ router.post("/add", (req, res) => {
 
     //  Create Job Object
     const newJob = new Job({
+        company: req.body.company,
         author: req.body.author,
         name: req.body.name,
         position: req.body.position,
