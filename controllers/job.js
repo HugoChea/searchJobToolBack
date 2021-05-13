@@ -7,7 +7,7 @@ module.exports = function validateJobInput(data) {
     
     // Name checks
     if (Validator.isEmpty(data.position)) {
-        errors.name = "Position is required";
+        errors.error = "Position is required";
     }
     return {
         errors,
